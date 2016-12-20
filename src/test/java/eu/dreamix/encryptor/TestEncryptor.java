@@ -1,11 +1,9 @@
 package eu.dreamix.encryptor;
 
-import javax.annotation.Resource;
-
 import org.jasypt.properties.PropertyValueEncryptionUtils;
 import org.jasypt.util.text.StrongTextEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
@@ -14,35 +12,26 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = { RootConfig.class })
 public class TestEncryptor extends AbstractTestNGSpringContextTests {
 
-    @Resource
-    private Environment environment;
+	@Autowired
+	private StrongTextEncryptor encryptor;
 
-    @Autowired
-    private StrongTextEncryptor encryptor;
+	@Value("${db.password.encrypted}")
+	private String PASSWORD_ENCRYPTED;
 
-    private static final String PROPERTY_NAME_DATABASE_PASSWORD_PLAIN = "db.password";
-    private static final String PROPERTY_NAME_DATABASE_PASSWORD_ENCRYPTED = "db.password.encrypted";
+	@Value("${db.password.plain}")
+	private String PASSWORD_PLAIN;
 
-    @Test
-    public void encrypt() {
-        String passwordPropertyValuePlain = environment.getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD_PLAIN);
+	@Test
+	public void encrypt() {
+		String encypted = encryptor.encrypt(PASSWORD_PLAIN);
+		Assert.assertNotEquals(PASSWORD_ENCRYPTED, encypted);
+	}
 
-        String encypted = encryptor.encrypt(passwordPropertyValuePlain);
-
-        Assert.assertNotEquals(environment.getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD_ENCRYPTED), encypted);
-
-    }
-
-    @Test
-    public void decrypt() {
-
-        String passwordPropertyValueEncrypted = environment
-                .getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD_ENCRYPTED);
-
-        if (PropertyValueEncryptionUtils.isEncryptedValue(passwordPropertyValueEncrypted)) {
-            String decypted = PropertyValueEncryptionUtils.decrypt(passwordPropertyValueEncrypted, encryptor);
-            Assert.assertEquals(environment.getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD_PLAIN), decypted);
-        }
-
-    }
+	@Test
+	public void decrypt() {
+		if (PropertyValueEncryptionUtils.isEncryptedValue(PASSWORD_ENCRYPTED)) {
+			String decypted = PropertyValueEncryptionUtils.decrypt(PASSWORD_ENCRYPTED, encryptor);
+			Assert.assertEquals(PASSWORD_PLAIN, decypted);
+		}
+	}
 }
