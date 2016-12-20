@@ -16,22 +16,23 @@ public class TestEncryptor extends AbstractTestNGSpringContextTests {
 	private StrongTextEncryptor encryptor;
 
 	@Value("${db.password.encrypted}")
-	private String PASSWORD_ENCRYPTED;
+	private String passwordEncrypted;
 
 	@Value("${db.password.plain}")
-	private String PASSWORD_PLAIN;
+	private String passwordPlain;
 
 	@Test
 	public void encrypt() {
-		String encypted = encryptor.encrypt(PASSWORD_PLAIN);
-		Assert.assertNotEquals(PASSWORD_ENCRYPTED, encypted);
+		String encypted = encryptor.encrypt(passwordPlain);
+		Assert.assertNotEquals(passwordEncrypted, encypted);
+
 	}
 
 	@Test
 	public void decrypt() {
-		if (PropertyValueEncryptionUtils.isEncryptedValue(PASSWORD_ENCRYPTED)) {
-			String decypted = PropertyValueEncryptionUtils.decrypt(PASSWORD_ENCRYPTED, encryptor);
-			Assert.assertEquals(PASSWORD_PLAIN, decypted);
+		if (PropertyValueEncryptionUtils.isEncryptedValue(passwordEncrypted)) {
+			String decypted = PropertyValueEncryptionUtils.decrypt(passwordEncrypted, encryptor);
+			Assert.assertEquals(passwordPlain, decypted);
 		}
 	}
 }
